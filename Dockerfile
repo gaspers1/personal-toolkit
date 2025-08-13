@@ -1,18 +1,14 @@
-# Use a slim Python base image
 FROM python:3.11-slim
 
-# Set working directory
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
-    && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Copy your app files (adjust this to your folder structure)
+# Copy only the requirements file to leverage Docker's layer cache
 COPY . .
 
-# Default command (optional – can override in docker run)
-CMD ["python", "main.py"]
+# Install dependencies into the virtual environment using uv
+RUN pip install -r requirements.txt
